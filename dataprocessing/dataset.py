@@ -55,6 +55,7 @@ class PhysionetDataset(Dataset):
       torch.save(rdim, f_rdim)
 
   def __getitem__(self, i):
+    #pid keeps track of which crops came from which patients in case we need it
     return self.orig[i], self.pid[i], self.age[i], self.sex[i], self.dx[i]
   
   def __len__(self):
