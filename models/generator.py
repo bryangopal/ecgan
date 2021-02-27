@@ -1,6 +1,12 @@
 from torch import nn, Tensor
 
 class Generator(nn.Module):
+  """
+    @fn    __init__
+    @param C_out: number of output channels
+    @param L: length of final generated sample
+    @param z_dim: dimensionality of noise vector
+  """
   def __init__(self, C_out: int = 12, L: int = 2500, z_dim: int = 256) -> None:
     super().__init__()
 

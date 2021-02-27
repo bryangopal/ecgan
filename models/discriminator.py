@@ -2,6 +2,11 @@ from torch import nn, Tensor
 from typing import List
 
 class Discriminator(nn.Module):
+  """
+    @fn    __init__
+    @param C_in: number of input channels
+    @param outs: list of output dimensions of every intended classifier
+  """
   def __init__(self, C_in: int = 12, outs: List[int] = [1, 24]) -> None:
     super().__init__()
 

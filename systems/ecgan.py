@@ -27,7 +27,7 @@ class ECGAN(pl.LightningModule):
     else: raise ValueError("Unhandled optimizer")
   
   """
-    @fn    _generator_step: Calculates the loss in the generator step.
+    @fn   _generator_step: Calculates the loss in the generator step.
           Generates as many fake examples as real examples, conditioned 
           on whatever labels the real examples have
     @param batch: A tuple of tensors output by the dataloader
