@@ -5,7 +5,7 @@ import pytorch_lightning as pl
 from systems import ECGAN
 from torch import Tensor
 from torch.utils.data import DataLoader
-from typing import Callable, Dict, Tuple, Optional
+from typing import Dict, Optional
 from utils import equiv_class_groups
 
 class GANDataModule(pl.LightningDataModule):
