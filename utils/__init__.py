@@ -17,7 +17,6 @@ _trainer = {
   "terminate_on_nan": True,
   "enable_pl_optimizer": True,
   "max_epochs": 250,
-  "auto_scale_batch_size": True,
   "precision": 16
 }
 
@@ -32,7 +31,7 @@ configs = AttrDict({
       "num_classes": num_classes,
       "C": num_leads,
       "L": rL,
-      "batch_size": 128
+      "batch_size": args.batch_size
     },
     "trainer": _trainer
   },
@@ -49,7 +48,7 @@ configs = AttrDict({
       "lr": args.ds_lr,
       "num_channels": num_leads,
       "num_classes": num_classes,
-      "batch_size": 128
+      "batch_size": args.batch_size
     },
     "trainer": {
       **_trainer,
@@ -65,7 +64,7 @@ configs = AttrDict({
       "test": [3]
     },
     "dims": (num_leads, rL),
-    "batch_size": 128,
+    "batch_size": args.batch_size,
     "num_workers": cpu_count()
   },
 

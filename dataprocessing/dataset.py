@@ -39,7 +39,7 @@ class PhysionetDataset(Dataset):
 
       r += N
     self._trim(r)
-    self.age = (self.age - self.age.mean()) / self.age.std()
+    self.age = (self.age - self.age.min()) / (self.age.max() - self.age.min())
 
   def __getitem__(self, i):
     #pid keeps track of which crops came from which patients in case we need it
