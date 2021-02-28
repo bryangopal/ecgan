@@ -23,6 +23,4 @@ To run, type `python run.py` with the directory name of where you would like che
 
 `fast_dev_run`: Runs a single training, validation, and testing loop of this program. Useful for debugging.
 
-`clear_data`: Usually, this program saves all datasets into separate tensor files to shortcut repetitive reprocessing of the original files. Turning this flag on would clear the folder containing these tensors and force the datasets to be reconstructed.
-
 `crop_time`: Sets the length in seconds of each ECG crop. Changing this dataset from this default would trigger a reprocessing of the data. Default: `5`

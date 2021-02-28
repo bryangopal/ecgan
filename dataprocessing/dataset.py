@@ -11,48 +11,35 @@ from typing import Optional, Tuple
 from utils import all_paths_exist, classes, rfreq, raw_data_path, num_classes
 
 class PhysionetDataset(Dataset):
-  def __init__(self, df: pd.DataFrame, prefix_path: str, rdim: Tuple, hint_N: int = 2 ** 14) -> None:
-    os.makedirs(prefix_path, exist_ok=True)
-    f_orig = f"{prefix_path}/orig.pt"
-    f_lbls = f"{prefix_path}/lbls.pt"
-    f_rdim = f"{prefix_path}/rdim.pt"
+  def __init__(self, df: pd.DataFrame, rdim: Tuple, hint_N: int = 2 ** 14) -> None:
+    self.orig = torch.empty(hint_N, *rdim)
+    self.pid = torch.empty(hint_N, dtype=torch.long)
+    self.age = torch.empty(hint_N, 1)
+    self.sex = torch.empty(hint_N, 1)
+    self.dx = torch.empty(hint_N, num_classes)
 
-    if all_paths_exist(f_orig, f_lbls, f_rdim) and torch.load(f_rdim) == rdim: 
-      self.orig = torch.load(f_orig)
-      self.pid, self.age, self.sex, self.dx = torch.load(f_lbls)
-    else:
-      self.orig = torch.empty(hint_N, *rdim)
-      self.pid = torch.empty(hint_N, dtype=torch.long)
-      self.age = torch.empty(hint_N, 1)
-      self.sex = torch.empty(hint_N, 1)
-      self.dx = torch.empty(hint_N, num_classes)
+    r = 0
+    for i, entry in tqdm(enumerate(df.iloc)):
+      age = entry["Age"]
+      sex = entry["Gender_Male"]
+      if not np.isfinite(age) or not np.isfinite(sex) or (sex != 0 and sex != 1): continue
 
-      r = 0
-      for i, entry in tqdm(enumerate(df.iloc)):
-        age = entry["Age"]
-        sex = entry["Gender_Male"]
-        if not np.isfinite(age) or not np.isfinite(sex) or (sex != 0 and sex != 1): continue
+      recording = PhysionetDataset._read_recording(entry["Patient"], rdim)
+      if recording is None: continue
+      
+      dx = torch.tensor(df.iloc[i][classes].astype(np.int).to_numpy()).unsqueeze(0)
+      N = len(recording)
+      while r + N > self.orig.shape[0]: self._grow()
 
-        recording = PhysionetDataset._read_recording(entry["Patient"], rdim)
-        if recording is None: continue
-        
-        dx = torch.tensor(df.iloc[i][classes].astype(np.int).to_numpy()).unsqueeze(0)
-        N = len(recording)
-        while r + N > self.orig.shape[0]: self._grow()
+      self.orig[r:r+N] = recording
+      self.pid[r:r+N] = i
+      self.age[r:r+N] = age
+      self.sex[r:r+N] = sex
+      self.dx[r:r+N] = dx
 
-        self.orig[r:r+N] = recording
-        self.pid[r:r+N] = i
-        self.age[r:r+N] = age
-        self.sex[r:r+N] = sex
-        self.dx[r:r+N] = dx
-
-        r += N
-      self._trim(r)
-      self.age = (self.age - self.age.mean()) / self.age.std()
-
-      torch.save(self.orig, f_orig)
-      torch.save((self.pid, self.age, self.sex, self.dx), f_lbls)
-      torch.save(rdim, f_rdim)
+      r += N
+    self._trim(r)
+    self.age = (self.age - self.age.mean()) / self.age.std()
 
   def __getitem__(self, i):
     #pid keeps track of which crops came from which patients in case we need it

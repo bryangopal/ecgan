@@ -56,7 +56,6 @@ configs = AttrDict({
   },
 
   "pdm": {
-    "path": data_path,
     "folds": {
       "train": [0, 1, 4, 5, 6, 7, 8, 9],
       "val": [2],

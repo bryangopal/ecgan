@@ -5,7 +5,7 @@ import pandas as pd
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
 from typing import Callable, Dict, Tuple, Optional
-from utils import saved_data_path, equiv_class_groups
+from utils import equiv_class_groups
 
 class PhysionetDataModule(pl.LightningDataModule):
   def __init__(self, path: str, folds: Dict, dims: Tuple, batch_size: int,  num_workers: int) -> None:
@@ -27,7 +27,7 @@ class PhysionetDataModule(pl.LightningDataModule):
   def _load_dataset(self, stage: str):
     df = self.splits[self.splits["fold"].isin(self.folds[stage])]
     print(f"Loading {stage} dataset...", end='', flush=True)
-    setattr(self, stage, PhysionetDataset(df, f"{saved_data_path}/{stage}", self.dims))
+    setattr(self, stage, PhysionetDataset(df, self.dims))
     print(f"done: {getattr(self, stage).orig.shape}")
   
   def _shared_dataloader(self, stage: str):

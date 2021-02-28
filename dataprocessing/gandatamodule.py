@@ -6,7 +6,7 @@ from systems import ECGAN
 from torch import Tensor
 from torch.utils.data import DataLoader
 from typing import Callable, Dict, Tuple, Optional
-from utils import saved_data_path, equiv_class_groups
+from utils import equiv_class_groups
 
 class GANDataModule(pl.LightningDataModule):
   def __init__(self, gan: ECGAN, ages: Dict[str, Tensor], 
