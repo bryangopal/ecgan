@@ -32,6 +32,7 @@ configs = AttrDict({
       "num_classes": num_classes,
       "C": num_leads,
       "L": rL,
+      "batch_size": 128
     },
     "trainer": _trainer
   },
@@ -47,7 +48,8 @@ configs = AttrDict({
       "encoder": args.ds_encoder,
       "lr": args.ds_lr,
       "num_channels": num_leads,
-      "num_classes": num_classes
+      "num_classes": num_classes,
+      "batch_size": 128
     },
     "trainer": {
       **_trainer,
