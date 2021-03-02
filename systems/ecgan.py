@@ -106,3 +106,4 @@ class ECGAN(pl.LightningModule):
   
   def enable_downstream(self):
     del self.disc
+    self.cpu()
