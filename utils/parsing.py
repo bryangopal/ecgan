@@ -3,7 +3,12 @@ from argparse import ArgumentParser
 _parser = ArgumentParser()
 
 _parser.add_argument("dir", type=str)
+_parser.add_argument("frac", type=float)
 
+_parser.add_argument("--frac_mode", type=str, default="full_rand",
+                     choices=["full_rand", "min_rand"])  
+_parser.add_argument("--gen_mode", type=str, default="parity",
+                     choices=["parity", "replace"])  
 _parser.add_argument("--skip_gan", action="store_true")
 _parser.add_argument("--gan_path", default=None, type=str)
 _parser.add_argument("--gan_lr", default=2e-4, type=float)

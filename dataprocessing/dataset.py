@@ -1,5 +1,4 @@
 import numpy as np
-import os
 import pandas as pd
 from scipy.io import loadmat
 from scipy.signal import decimate, resample
@@ -8,15 +7,18 @@ from torch import Tensor
 from torch.utils.data import Dataset
 from tqdm import tqdm
 from typing import Optional, Tuple
-from utils import all_paths_exist, classes, rfreq, raw_data_path, num_classes
+from utils import classes, rfreq, raw_data_path, num_classes
 
 class PhysionetDataset(Dataset):
-  def __init__(self, df: pd.DataFrame, rdim: Tuple, hint_N: int = 2 ** 14) -> None:
+  def __init__(self, df: pd.DataFrame, rdim: Tuple, frac: Optional[float] = None, 
+               frac_mode: Optional[str] = None, hint_N: int = 2 ** 14) -> None:
+    super().__init__()
     self.orig = torch.empty(hint_N, *rdim)
     self.pid = torch.empty(hint_N, dtype=torch.long)
     self.age = torch.empty(hint_N, 1)
     self.sex = torch.empty(hint_N, 1)
     self.dx = torch.empty(hint_N, num_classes)
+    self.n_removed = 0
 
     r = 0
     for i, entry in tqdm(enumerate(df.iloc)):
@@ -40,6 +42,7 @@ class PhysionetDataset(Dataset):
       r += N
     self._trim(r)
     self.age = (self.age - self.age.min()) / (self.age.max() - self.age.min())
+    if frac and frac_mode: self._fractionate(frac, frac_mode)
 
   def __getitem__(self, i):
     #pid keeps track of which crops came from which patients in case we need it
@@ -50,15 +53,43 @@ class PhysionetDataset(Dataset):
   
   def _grow(self):
     self.orig = torch.cat((self.orig, torch.empty_like(self.orig)), dim=0)
-    self.pid = torch.cat((self.pid, torch.empty_like(self.pid)), dim=0)
-    self.age = torch.cat((self.age, torch.empty_like(self.age)), dim=0)
-    self.sex = torch.cat((self.sex, torch.empty_like(self.sex)), dim=0)
-    self.dx = torch.cat((self.dx, torch.empty_like(self.dx)), dim=0)
+    self.pid  = torch.cat((self.pid , torch.empty_like(self.pid)) , dim=0)
+    self.age  = torch.cat((self.age , torch.empty_like(self.age)) , dim=0)
+    self.sex  = torch.cat((self.sex , torch.empty_like(self.sex)) , dim=0)
+    self.dx   = torch.cat((self.dx  , torch.empty_like(self.dx))  , dim=0)
 
   def _trim(self, r: int):
-    self.orig = self.orig[:r].contiguous()
-    self.pid = self.pid[:r].contiguous()
-    self.dx = self.dx[:r].contiguous()
+    self._apply_mask(slice(r))
+  
+  def _apply_mask(self, mask):
+    self.orig = self.orig[mask].contiguous()
+    self.pid  = self.pid[mask].contiguous()
+    self.age  = self.age[mask].contiguous()
+    self.sex  = self.sex[mask].contiguous()
+    self.dx   = self.dx[mask].contiguous()
+  
+  def _fractionate(self, frac: float, frac_mode: str):
+    mask = torch.zeros(len(self), dtype=torch.bool)
+    if frac >= 1: return
+    elif frac_mode == "full_rand": mask = torch.rand(len(self)) < frac
+    elif frac_mode == "min_rand":
+      pid_sorted = torch.histc(self.pid, min=0, bins=self.pid.max()).argsort()
+      required = torch.zeros(self.dx.shape[1], dtype=torch.bool)
+      for pid in pid_sorted:
+        if required.all(): break
+        relevant = self.pid == pid
+
+        dx = self.dx[relevant].bool()
+        assert (dx == dx[0]).all(), "Incorrect pid mask"
+        dx = dx[0]
+
+        if dx[dx ^ required].any():
+          mask |= relevant
+          required |= dx
+      if (mask.count_nonzero() / len(mask)) < frac: mask[torch.rand_like(mask) < frac] = True
+    else: raise ValueError(f"Unimplemented fractioning method: {frac_mode}")
+    self.n_removed = (~mask).count_nonzero()
+    self._apply_mask(mask)
 
   @staticmethod
   def _read_recording(id: str, rdim: Tuple) -> Optional[Tensor]:

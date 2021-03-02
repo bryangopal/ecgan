@@ -18,8 +18,8 @@ class ECGAN(pl.LightningModule):
     #Classifiers for Source, Age, Sex, and Class, in that order
     self.disc = Discriminator(self.hparams.C, outs = [1, 1, 1, self.hparams.num_classes]) 
   
-  def forward(self, z: Tensor) -> Tensor:
-    return self.gen(z) #useful for generating datasets all at once
+  def forward(self, age: Tensor, sex: Tensor, dx: Tensor) -> Tensor:
+    return self.gen(self._get_input(len(dx), [age, sex, dx])) #useful for generating datasets all at once
 
   def training_step(self, batch: Tuple, batch_idx: int, optimizer_idx: int):
     if optimizer_idx == 0: return self._discriminator_step(batch) 
@@ -34,28 +34,32 @@ class ECGAN(pl.LightningModule):
   """
   def _generator_step(self, batch):
     real, pid, *lbls = batch
-    fake = self.gen(self._get_noise(len(real), lbls))
+    fake = self.gen(self._get_input(len(real), lbls))
 
     return self._calculate_loss("gen", self.disc(fake), lbls) #pass fake in as if it were real
 
   """
-    @fn    _discriminator_step: Calculates the loss in the discriminator step
+    @fn    _discriminator_step: Calculates the loss in the discriminator step.
     @param batch: A tuple of tensors output by the dataloader
   """
   def _discriminator_step(self, batch):
     real, pid, *lbls = batch
 
     with torch.no_grad():
-      fake = self.gen(self._get_noise(len(real), lbls))
+      fake = self.gen(self._get_input(len(real), lbls))
     
     return self._calculate_loss("disc", self.disc(real), lbls, self.disc(fake))
   
   """
-    @fn    _get_noise: Get noise vector to input in GAN
+    @fn    _get_input: Get input vector to for GAN.
     @param N: How many samples are going to be generated
-    @param lbls: a tuple of labels containing age, sex, and diagnosis in that order
+    @param lbls: a tuple of labels containing age, sex, and diagnosis in that order.
+                 If None, random noise is passed in as labels.
   """
-  def _get_noise(self, N, lbls: List[Tensor]):
+  def _get_input(self, N, lbls: Optional[List[Tensor]] = None):
+    if not lbls: lbls = [torch.rand(N, 1), torch.rand(N, 1), torch.rand(N, self.hparams.num_classes)]
+    self.check_lbls(N, lbls)
+
     return torch.cat((torch.rand(N, self.hparams.z_dim, device=self.device), *lbls), dim=1)
 
   """
@@ -83,7 +87,17 @@ class ECGAN(pl.LightningModule):
     loss = Ls + Lc #if called correctly, this is the same for both disc and gen
     self.log(f"{stage}_loss", loss) #log loss
     return loss
-
+  
+  def check_lbls(self, N, lbls: List[Tensor]):
+    as_shape = torch.Size((N, 1))
+    dx_shape = torch.Size((N, self.hparams.num_classes))
+    if len(lbls) != 3 or lbls[0].shape != lbls[1].shape != as_shape or \
+       lbls[2].shape != dx_shape:
+      raise ValueError("Incorrect labels passed in.\n"
+                       f"age: saw {lbls[0].shape}, expected {as_shape}\n"
+                       f"sex: saw {lbls[1].shape}, expected {as_shape}\n"
+                       f" dx: saw {lbls[2].shape}, expected {dx_shape}")
+  
   def configure_optimizers(self):
     return [
       Adam(self.disc.parameters(), lr=self.hparams.lr), 

@@ -1,16 +1,18 @@
 from .dataset import PhysionetDataset
 
-import numpy as np
 import pandas as pd
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
-from typing import Callable, Dict, Tuple, Optional
+from typing import Dict, Tuple, Optional
 from utils import equiv_class_groups
 
 class PhysionetDataModule(pl.LightningDataModule):
-  def __init__(self, path: str, folds: Dict, dims: Tuple, batch_size: int,  num_workers: int) -> None:
+  def __init__(self, path: str, frac: float, frac_mode: str, folds: Dict, dims: Tuple, 
+               batch_size: int,  num_workers: int) -> None:
     super().__init__()
 
+    self.frac = frac
+    self.frac_mode = frac_mode
     self.splits = PhysionetDataModule._get_splits(path)
     self.folds = folds
     self.dims = dims
@@ -18,21 +20,16 @@ class PhysionetDataModule(pl.LightningDataModule):
     self.num_workers = num_workers
   
   def setup(self, stage: Optional[str] = None) -> None:
+    df = lambda split: self.splits[self.splits["fold"].isin(self.folds[split])]
     if stage == "fit" or stage is None:
-      self._load_dataset("train")
-      self._load_dataset("val")
+      self.train = PhysionetDataset(df("train"), self.dims, self.frac, self.frac_mode)
+      self.val   = PhysionetDataset(df("val"), self.dims)
     if stage == "test" or stage is None:
-      self._load_dataset("test")
+      self.test  = PhysionetDataset(df("test"), self.dims)
   
-  def _load_dataset(self, stage: str):
-    df = self.splits[self.splits["fold"].isin(self.folds[stage])]
-    print(f"Loading {stage} dataset...", end='', flush=True)
-    setattr(self, stage, PhysionetDataset(df, self.dims))
-    print(f"done: {getattr(self, stage).orig.shape}")
-  
-  def _shared_dataloader(self, stage: str):
-    return DataLoader(getattr(self, stage), batch_size=self.batch_size, num_workers=self.num_workers, 
-                      pin_memory=True, shuffle=stage == "train")
+  def _shared_dataloader(self, split: str):
+    return DataLoader(getattr(self, split), batch_size=self.batch_size, num_workers=self.num_workers, 
+                      pin_memory=True, shuffle=split == "train")
   
   def train_dataloader(self) -> DataLoader:
     return self._shared_dataloader("train")
@@ -42,23 +39,6 @@ class PhysionetDataModule(pl.LightningDataModule):
 
   def test_dataloader(self) -> DataLoader:
     return self._shared_dataloader("test")
-  
-  def get_labels(self):
-    if not self.has_setup_fit: self.setup("fit")
-    if not self.has_setup_test: self.setup("test")
-    return [{
-      "train": self.train.age,
-      "val": self.val.age,
-      "test": self.test.age
-    }, {
-      "train": self.train.sex,
-      "val": self.val.sex,
-      "test": self.test.sex
-    }, {
-      "train": self.train.dx,
-      "val": self.val.dx,
-      "test": self.test.dx
-    }]
   
   @staticmethod
   def _get_splits(path: str):

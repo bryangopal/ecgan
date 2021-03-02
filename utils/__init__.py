@@ -58,6 +58,8 @@ configs = AttrDict({
 
   "pdm": {
     "path": data_path,
+    "frac": args.frac,
+    "frac_mode": args.frac_mode,
     "folds": {
       "train": [0, 1, 4, 5, 6, 7, 8, 9],
       "val": [2],
@@ -69,6 +71,7 @@ configs = AttrDict({
   },
 
   "gdm": {
+    "gen_mode": args.gen_mode,
     "batch_size": 128,
     "num_workers": cpu_count()
   },
