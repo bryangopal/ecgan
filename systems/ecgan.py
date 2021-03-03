@@ -4,6 +4,7 @@ import torch
 from torch import Tensor
 from torch.nn.functional import binary_cross_entropy_with_logits as bce, mse_loss as mse
 from torch.optim import Adam
+from tqdm import tqdm
 from typing import Dict, List, Optional, Tuple
 
 class ECGAN(pl.LightningModule):
@@ -18,7 +19,13 @@ class ECGAN(pl.LightningModule):
     #Classifiers for Source, Age, Sex, and Class, in that order
     self.disc = Discriminator(self.hparams.C, outs = [1, 1, 1, self.hparams.num_classes]) 
   
-  def forward(self, age: Tensor, sex: Tensor, dx: Tensor) -> Tensor:
+  def forward(self, age: Tensor, sex: Tensor, dx: Tensor, downstream: bool = False) -> Tensor:
+    if downstream:
+      output = torch.empty(0)
+      for i in tqdm(range(len(dx), step=self.hparams.batch_size)):
+        end = min(i + self.hparams.batch_size, len(dx))
+        output = torch.cat((output, self.gen(age[i:end], sex[i:end], dx[i:end]).cpu()), dim=0)
+      return output
     return self.gen(self._get_input(len(dx), [age, sex, dx])) #useful for generating datasets all at once
 
   def training_step(self, batch: Tuple, batch_idx: int, optimizer_idx: int):
@@ -106,4 +113,3 @@ class ECGAN(pl.LightningModule):
   
   def enable_downstream(self):
     del self.disc
-    self.cpu()
