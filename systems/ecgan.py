@@ -24,7 +24,8 @@ class ECGAN(pl.LightningModule):
       output = torch.empty(0)
       for i in tqdm(range(0, len(dx), self.hparams.batch_size)):
         end = min(i + self.hparams.batch_size, len(dx))
-        output = torch.cat((output, self.gen(age[i:end], sex[i:end], dx[i:end]).cpu()), dim=0)
+        output = torch.cat((output, 
+          self.gen(self._get_input(len(dx), [age[i:end], sex[i:end], dx[i:end]])).cpu()), dim=0)
       return output
     return self.gen(self._get_input(len(dx), [age, sex, dx])) #useful for generating datasets all at once
 
