@@ -25,9 +25,9 @@ class ECGAN(pl.LightningModule):
       for i in tqdm(range(0, len(dx), self.hparams.batch_size)):
         end = min(i + self.hparams.batch_size, len(dx))
         output = torch.cat((output, 
-          self.gen(self._get_input(len(dx), [age[i:end], sex[i:end], dx[i:end]])).cpu()), dim=0)
+          self.gen(self._get_input([age[i:end], sex[i:end], dx[i:end]])).cpu()), dim=0)
       return output
-    return self.gen(self._get_input(len(dx), [age, sex, dx])) #useful for generating datasets all at once
+    return self.gen(self._get_input([age, sex, dx])) #useful for generating datasets all at once
 
   def training_step(self, batch: Tuple, batch_idx: int, optimizer_idx: int):
     if optimizer_idx == 0: return self._discriminator_step(batch) 
@@ -42,7 +42,7 @@ class ECGAN(pl.LightningModule):
   """
   def _generator_step(self, batch):
     real, pid, *lbls = batch
-    fake = self.gen(self._get_input(len(real), lbls))
+    fake = self.gen(self._get_input(lbls))
 
     return self._calculate_loss("gen", self.disc(fake), lbls) #pass fake in as if it were real
 
@@ -54,7 +54,7 @@ class ECGAN(pl.LightningModule):
     real, pid, *lbls = batch
 
     with torch.no_grad():
-      fake = self.gen(self._get_input(len(real), lbls))
+      fake = self.gen(self._get_input(lbls))
     
     return self._calculate_loss("disc", self.disc(real), lbls, self.disc(fake))
   
@@ -64,10 +64,8 @@ class ECGAN(pl.LightningModule):
     @param lbls: a tuple of labels containing age, sex, and diagnosis in that order.
                  If None, random noise is passed in as labels.
   """
-  def _get_input(self, N, lbls: Optional[List[Tensor]] = None):
-    if not lbls: lbls = [torch.rand(N, 1), torch.rand(N, 1), torch.rand(N, self.hparams.num_classes)]
-    self.check_lbls(N, lbls)
-
+  def _get_input(self, lbls: List[Tensor]):
+    N = self.check_lbls(lbls)
     return torch.cat((torch.rand(N, self.hparams.z_dim, device=self.device), *lbls), dim=1)
 
   """
@@ -96,7 +94,8 @@ class ECGAN(pl.LightningModule):
     self.log(f"{stage}_loss", loss) #log loss
     return loss
   
-  def check_lbls(self, N, lbls: List[Tensor]):
+  def check_lbls(self, lbls: List[Tensor]):
+    N = lbls[0].shape[0]
     as_shape = torch.Size((N, 1))
     dx_shape = torch.Size((N, self.hparams.num_classes))
     if len(lbls) != 3 or lbls[0].shape != lbls[1].shape != as_shape or \
@@ -105,6 +104,7 @@ class ECGAN(pl.LightningModule):
                        f"age: saw {lbls[0].shape}, expected {as_shape}\n"
                        f"sex: saw {lbls[1].shape}, expected {as_shape}\n"
                        f" dx: saw {lbls[2].shape}, expected {dx_shape}")
+    return N
   
   def configure_optimizers(self):
     return [
