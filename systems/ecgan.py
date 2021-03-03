@@ -22,7 +22,7 @@ class ECGAN(pl.LightningModule):
   def forward(self, age: Tensor, sex: Tensor, dx: Tensor, downstream: bool = False) -> Tensor:
     if downstream:
       output = torch.empty(0)
-      for i in tqdm(range(len(dx), step=self.hparams.batch_size)):
+      for i in tqdm(range(0, len(dx), self.hparams.batch_size)):
         end = min(i + self.hparams.batch_size, len(dx))
         output = torch.cat((output, self.gen(age[i:end], sex[i:end], dx[i:end]).cpu()), dim=0)
       return output
