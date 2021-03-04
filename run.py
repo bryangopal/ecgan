@@ -16,8 +16,11 @@ def train() -> ECGAN:
   cfg = configs.gan
   model = ECGAN(cfg.hparams)
   pdm = PhysionetDataModule(**configs.pdm)
-  if cfg.skip: return (ECGAN.load_from_checkpoint(cfg.path), pdm) if cfg.path else (model, pdm)
-
+  if cfg.skip: 
+    pdm.setup("fit")
+    if cfg.path: return ECGAN.load_from_checkpoint(cfg.path), pdm
+    else: return model, pdm
+  
   trainer = Trainer(**cfg.trainer, resume_from_checkpoint=cfg.path)
   trainer.tune(model, datamodule=pdm)
   trainer.fit(model, datamodule=pdm)
