@@ -128,3 +128,10 @@ class PhysionetDataset(Dataset):
   def _get_sampling_rate(file_name: str):
     with open(f"{file_name}.hea", 'r') as f:
       return int(f.readline().split(None, 3)[2])
+  
+  def clear(self):
+    del self.orig
+    del self.pid
+    del self.age
+    del self.sex
+    del self.dx
