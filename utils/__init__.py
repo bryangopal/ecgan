@@ -66,6 +66,7 @@ configs = AttrDict({
       "test": [3]
     },
     "dims": (num_leads, rL),
+    "replace": args.gen_mode == "replace",
     "batch_size": args.batch_size,
     "num_workers": cpu_count()
   },
