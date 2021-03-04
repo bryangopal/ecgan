@@ -17,6 +17,7 @@ class DownstreamDataset(Dataset):
   def _gen_data(self, gan: ECGAN, N: int, gen_mode: str):
     age, sex, dx = None, None, None
     if gen_mode == "replace":
+      del self.orig
       self.orig = gan(self.age, self.sex, self.dx, downstream=True)
       return
     elif gen_mode == "parity":
