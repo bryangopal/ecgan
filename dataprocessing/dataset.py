@@ -10,10 +10,10 @@ from typing import Optional, Tuple
 from utils import classes, rfreq, raw_data_path, num_classes
 
 class PhysionetDataset(Dataset):
-  def __init__(self, df: pd.DataFrame, rdim: Tuple, replace: bool, frac: Optional[float] = None, 
+  def __init__(self, df: pd.DataFrame, rdim: Tuple, frac: Optional[float] = None, 
                frac_mode: Optional[str] = None, hint_N: int = 2 ** 14) -> None:
     super().__init__()
-    self.orig = torch.empty(hint_N, *rdim) if not replace else None
+    self.orig = torch.empty(hint_N, *rdim)
     self.pid = torch.empty(hint_N, dtype=torch.long)
     self.age = torch.empty(hint_N, 1)
     self.sex = torch.empty(hint_N, 1)
@@ -25,15 +25,15 @@ class PhysionetDataset(Dataset):
       age = entry["Age"]
       sex = entry["Gender_Male"]
       if not np.isfinite(age) or not np.isfinite(sex) or (sex != 0 and sex != 1): continue
-      
+
       recording = PhysionetDataset._read_recording(entry["Patient"], rdim)
       if recording is None: continue
       
       dx = torch.tensor(df.iloc[i][classes].astype(np.int).to_numpy()).unsqueeze(0)
       N = len(recording)
-      while r + N > self.orig.shape[0]: self._grow(replace)
+      while r + N > self.orig.shape[0]: self._grow()
 
-      if self.orig: self.orig[r:r+N] = recording
+      self.orig[r:r+N] = recording
       self.pid[r:r+N] = i
       self.age[r:r+N] = age
       self.sex[r:r+N] = sex
@@ -51,12 +51,12 @@ class PhysionetDataset(Dataset):
   def __len__(self):
     return len(self.orig)
   
-  def _grow(self, exclude_orig: bool):
-    if not exclude_orig: self.orig = torch.cat((self.orig, torch.empty_like(self.orig)), dim=0)
-    self.pid = torch.cat((self.pid, torch.empty_like(self.pid)), dim=0)
-    self.age = torch.cat((self.age, torch.empty_like(self.age)), dim=0)
-    self.sex = torch.cat((self.sex, torch.empty_like(self.sex)), dim=0)
-    self.dx  = torch.cat((self.dx , torch.empty_like(self.dx)) , dim=0)
+  def _grow(self):
+    self.orig = torch.cat((self.orig, torch.empty_like(self.orig)), dim=0)
+    self.pid  = torch.cat((self.pid , torch.empty_like(self.pid)) , dim=0)
+    self.age  = torch.cat((self.age , torch.empty_like(self.age)) , dim=0)
+    self.sex  = torch.cat((self.sex , torch.empty_like(self.sex)) , dim=0)
+    self.dx   = torch.cat((self.dx  , torch.empty_like(self.dx))  , dim=0)
 
   def _trim(self, r: int):
     self._apply_mask(slice(r))
