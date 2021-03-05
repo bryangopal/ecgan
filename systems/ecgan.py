@@ -18,16 +18,9 @@ class ECGAN(pl.LightningModule):
     
     #Classifiers for Source, Age, Sex, and Class, in that order
     self.disc = Discriminator(self.hparams.C, outs = [1, 1, 1, self.hparams.num_classes]) 
-  
-  def forward(self, age: Tensor, sex: Tensor, dx: Tensor, downstream: bool = False) -> Tensor:
-    if downstream:
-      output = torch.empty(0)
-      for i in tqdm(range(0, len(dx), self.hparams.batch_size)):
-        end = min(i + self.hparams.batch_size, len(dx))
-        output = torch.cat((output, 
-          self.gen(self._get_input([age[i:end], sex[i:end], dx[i:end]])).cpu()), dim=0)
-      return output
-    return self.gen(self._get_input([age, sex, dx])) #useful for generating datasets all at once
+
+  def forward(self, age: Tensor, sex: Tensor, dx: Tensor) -> Tensor:
+    return self.gen(self._get_input([age, sex, dx]))
 
   def training_step(self, batch: Tuple, batch_idx: int, optimizer_idx: int):
     if optimizer_idx == 0: return self._discriminator_step(batch) 
@@ -96,13 +89,13 @@ class ECGAN(pl.LightningModule):
   
   def check_lbls(self, lbls: List[Tensor]):
     N = lbls[0].shape[0]
-    as_shape = torch.Size((N, 1))
+    md_shape = torch.Size((N, 1))
     dx_shape = torch.Size((N, self.hparams.num_classes))
-    if len(lbls) != 3 or lbls[0].shape != lbls[1].shape != as_shape or \
+    if len(lbls) != 3 or lbls[0].shape != lbls[1].shape != md_shape or \
        lbls[2].shape != dx_shape:
       raise ValueError("Incorrect labels passed in.\n"
-                       f"age: saw {lbls[0].shape}, expected {as_shape}\n"
-                       f"sex: saw {lbls[1].shape}, expected {as_shape}\n"
+                       f"age: saw {lbls[0].shape}, expected {md_shape}\n"
+                       f"sex: saw {lbls[1].shape}, expected {md_shape}\n"
                        f" dx: saw {lbls[2].shape}, expected {dx_shape}")
     return N
   
@@ -114,3 +107,4 @@ class ECGAN(pl.LightningModule):
   
   def enable_downstream(self):
     del self.disc
+    self.eval()

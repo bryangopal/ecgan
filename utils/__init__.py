@@ -1,6 +1,5 @@
 __author__ = "Bryan Gopal"
 from .data_info import *
-from .metrics import *
 from .parsing import *
 from .paths import *
 
@@ -30,8 +29,7 @@ configs = AttrDict({
       "z_dim": args.z_dim,
       "num_classes": num_classes,
       "C": num_leads,
-      "L": rL,
-      "batch_size": args.batch_size
+      "L": rL
     },
     "trainer": _trainer
   },
@@ -48,7 +46,8 @@ configs = AttrDict({
       "lr": args.ds_lr,
       "num_channels": num_leads,
       "num_classes": num_classes,
-      "batch_size": args.batch_size
+      "gen_mode": args.gen_mode,
+      "gen_frac": 1 - args.frac
     },
     "trainer": {
       **_trainer,
@@ -59,7 +58,6 @@ configs = AttrDict({
   "pdm": {
     "path": data_path,
     "frac": args.frac,
-    "frac_mode": args.frac_mode,
     "folds": {
       "train": [0, 1, 4, 5, 6, 7, 8, 9],
       "val": [2],
@@ -68,11 +66,5 @@ configs = AttrDict({
     "dims": (num_leads, rL),
     "batch_size": args.batch_size,
     "num_workers": cpu_count()
-  },
-
-  "gdm": {
-    "gen_mode": args.gen_mode,
-    "batch_size": 128,
-    "num_workers": cpu_count()
-  },
+  }
 })

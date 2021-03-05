@@ -3,6 +3,10 @@ ECG GAN Conditioned on Class and Metadata. Leverages parts of a codebase I wrote
 
 To run, type `python run.py` with the directory name of where you would like checkpoint and logging information saved. You can optionally modify program behavior with the following flags:
 
+`gen_mode`: How to use the GAN for downstream classification. Choices: `"replace"` (replace original data with GAN data) or `"augment"` (generate as many samples masked o)
+
+`skip_gan`: Skip GAN Training. Useful if you want to load state from a checkpoint.
+
 `skip_gan`: Skip GAN Training. Useful if you want to load state from a checkpoint.
 
 `gan_path`: GAN Checkpoint path to load. Must have been saved by a previous run of this program.

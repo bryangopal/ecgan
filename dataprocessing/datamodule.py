@@ -7,12 +7,11 @@ from typing import Dict, Tuple, Optional
 from utils import equiv_class_groups
 
 class PhysionetDataModule(pl.LightningDataModule):
-  def __init__(self, path: str, frac: float, frac_mode: str, folds: Dict, dims: Tuple, 
+  def __init__(self, path: str, frac: float, folds: Dict, dims: Tuple, 
                batch_size: int,  num_workers: int) -> None:
     super().__init__()
 
     self.frac = frac
-    self.frac_mode = frac_mode
     self.splits = PhysionetDataModule._get_splits(path)
     self.folds = folds
     self.dims = dims
@@ -22,7 +21,7 @@ class PhysionetDataModule(pl.LightningDataModule):
   def setup(self, stage: Optional[str] = None) -> None:
     df = lambda split: self.splits[self.splits["fold"].isin(self.folds[split])]
     if stage == "fit" or stage is None:
-      self.train = PhysionetDataset(df("train"), self.dims, self.frac, self.frac_mode)
+      self.train = PhysionetDataset(df("train"), self.dims, self.frac)
       self.val   = PhysionetDataset(df("val"), self.dims)
     if stage == "test" or stage is None:
       self.test  = PhysionetDataset(df("test"), self.dims)
