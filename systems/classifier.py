@@ -1,5 +1,5 @@
 import models
-from systems import ECGAN
+from .ecgan import ECGAN
 import pytorch_lightning as pl
 from pytorch_lightning.metrics import AUROC
 import torch
