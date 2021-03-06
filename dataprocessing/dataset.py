@@ -39,8 +39,8 @@ class PhysionetDataset(Dataset):
 
       r += N
     self._trim(r)
-    if frac: self._apply_mask(torch.randperm(len(self))[:int(frac * len(self))])
     self.age = (self.age - self.age.min()) / (self.age.max() - self.age.min())
+    if frac: self._apply_mask(torch.randperm(len(self))[:int(frac * len(self))])
 
   def __getitem__(self, i):
     #pid keeps track of which crops came from which patients in case we need it
