@@ -30,7 +30,7 @@ class Classifier(pl.LightningModule):
     }
   
   def _shared_step(self, batch, stage: str):
-    x, y = self.batch_fn(batch) if stage == "train" else batch[0], batch[-1]
+    x, y = self.batch_fn(batch) if stage == "train" else (batch[0], batch[-1])
 
     y_hat = self.classifier(self.model(x))
     if stage == "train": 
