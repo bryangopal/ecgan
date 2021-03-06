@@ -40,7 +40,8 @@ class Classifier(pl.LightningModule):
     else: self.aurocs[stage](softmax(y_hat.detach(), dim=-1), y.long())
   
   def _shared_epoch_end(self, stage: str):
-    self.log(f"{stage}_auroc", self.aurocs[stage].compute())
+    try: self.log(f"{stage}_auroc", self.aurocs[stage].compute())
+    except ValueError as e: print(f"Could not calcualte AUROC: {e}")
     self.aurocs[stage].reset()
   
   def replace_batch(self, batch):
