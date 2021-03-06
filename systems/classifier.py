@@ -33,10 +33,10 @@ class Classifier(pl.LightningModule):
     x, y = self.batch_fn(batch)
 
     y_hat = self.classifier(self.model(x))
-    loss = torch.mean(torch.stack([bce(y_hat[:, c], y[:, c]) for c in range(self.hparams.num_classes)]))
-
-    self.log(f"{stage}_loss", loss)
-    if stage == "train": return loss
+    if stage == "train": 
+      loss = bce(y_hat, y)
+      self.log(f"{stage}_loss", loss)
+      return loss
     else: self.aurocs[stage](softmax(y_hat.detach(), dim=-1), y.long())
   
   def _shared_epoch_end(self, stage: str):
