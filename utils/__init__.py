@@ -48,9 +48,13 @@ configs = AttrDict({
       "num_channels": num_leads,
       "num_classes": num_classes,
       "gen_mode": args.gen_mode,
-      "gen_frac": 1 - args.frac
+      "gen_frac": 1 - args.frac,
+      "batch_size": args.batch_size
     },
-    "trainer": _trainer
+    "trainer": {
+      **_trainer,
+      "auto_scale_batch_size": args.gen_mode is not None
+    }
   },
 
   "pdm": {
