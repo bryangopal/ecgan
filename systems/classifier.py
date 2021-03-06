@@ -17,7 +17,7 @@ class Classifier(pl.LightningModule):
     self.gan.enable_downstream()
 
     self.model = getattr(models, self.hparams.encoder)(self.hparams.num_channels)
-    self.classifier = nn.Linear(2048, self.hparams.num_classes)
+    self.classifier = nn.Linear(512, self.hparams.num_classes)
     
     if self.hparams.gen_mode is None: self.batch_fn = lambda batch: (batch[0], batch[-1]) 
     elif self.hparams.gen_mode == "replace": self.batch_fn = self.replace_batch
