@@ -42,6 +42,7 @@ configs = AttrDict({
       "mode": "max"
     },
     "hparams": {
+      "gan_path": args.gan_path,
       "encoder": args.ds_encoder,
       "lr": args.ds_lr,
       "num_channels": num_leads,
