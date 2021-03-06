@@ -50,10 +50,7 @@ configs = AttrDict({
       "gen_mode": args.gen_mode,
       "gen_frac": 1 - args.frac
     },
-    "trainer": {
-      **_trainer,
-      "auto_lr_find": True
-    }
+    "trainer": _trainer
   },
 
   "pdm": {
