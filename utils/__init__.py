@@ -38,7 +38,7 @@ configs = AttrDict({
     "skip": args.skip_ds,
     "path": _expand_path(args.ds_path),
     "metric": {
-      "monitor": "le_val_auroc",
+      "monitor": "val_auroc",
       "mode": "max"
     },
     "hparams": {
