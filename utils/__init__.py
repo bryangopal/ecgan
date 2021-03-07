@@ -51,10 +51,7 @@ configs = AttrDict({
       "gen_frac": 1 - args.frac,
       "batch_size": args.batch_size
     },
-    "trainer": {
-      **_trainer,
-      "auto_scale_batch_size": args.gen_mode == "augment"
-    }
+    "trainer": _trainer
   },
 
   "pdm": {

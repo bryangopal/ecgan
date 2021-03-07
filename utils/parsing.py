@@ -23,3 +23,6 @@ _parser.add_argument("--crop_time", type=int, default=5)
 _parser.add_argument("--batch_size", type=int, default=2048)
 
 args = _parser.parse_args()
+
+if args.skip_gan and args.gen_mode == "augment":
+  args.batch_size = int(args.batch_size * args.frac) 
