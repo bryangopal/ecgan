@@ -53,7 +53,7 @@ configs = AttrDict({
     },
     "trainer": {
       **_trainer,
-      "auto_scale_batch_size": args.gen_mode == "parity"
+      "auto_scale_batch_size": args.gen_mode == "augment"
     }
   },
 
