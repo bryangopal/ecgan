@@ -19,7 +19,7 @@ To run, type `python run.py` with the directory name of where you would like che
 
 `ds_path`: Downstream Classification Checkpoint path to load. Must have been saved by a previous run of this program.
 
-`ds_encoder`: What architecture you want to use to classify. Current options are a ResNet50 and a ResNet18. Default: `resnet50`
+`ds_encoder`: What architecture you want to use to classify. Current options are a ResNet50 and a ResNet18. Default: `resnet18`
 
 `ds_lr`: Learning rate of your classifier. Default: `2e-4`
 
