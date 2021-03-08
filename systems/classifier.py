@@ -50,7 +50,7 @@ class Classifier(pl.LightningModule):
   
   def augment_batch(self, batch: Tuple[Tensor, ...]):
     orig, pid, age, sex, dx = batch
-    N = int(self.hparams.gen_frac * len(dx))
+    N = int(len(dx) * self.hparams.gen_frac / (1 - self.hparams.gen_frac))
 
     gan_dx = one_hot(
       torch.randint(high=self.hparams.num_classes, size=(N,), device=self.device)
