@@ -23,8 +23,8 @@ _parser.add_argument("--batch_size", type=int, default=2048)
 
 args = _parser.parse_args()
 
-if args.skip_gan and args.gen_mode == "augment":
-  args.batch_size = int(args.batch_size * (1 - args.ds_gen_frac))
-
 if args.skip_gan == args.skip_ds:
   raise ValueError("Must train either GAN or Downstream model.")
+
+if args.ds_gen_mode == "augment":
+  args.batch_size = int(args.batch_size * (1 - args.ds_gen_frac))
