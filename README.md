@@ -7,7 +7,7 @@ To run, type `python run.py` with the directory name of where you would like che
 
 `skip_gan`: Skip GAN Training. Useful if you want to load state from a checkpoint.
 
-`skip_gan`: Skip GAN Training. Useful if you want to load state from a checkpoint.
+`skip_gan`: Skip GAN Training. Useful if you want to load state from a checkpoint. Must skip either GAN or Downstream per program call.
 
 `gan_path`: GAN Checkpoint path to load. Must have been saved by a previous run of this program.
 
@@ -15,7 +15,7 @@ To run, type `python run.py` with the directory name of where you would like che
 
 `z_dim`: What the dimensionality of your noise vector should be. Default: `256`
 
-`skip_ds`: Skip Downstream Classification. Useful if you only want to train the GAN and not evaluate it.
+`skip_ds`: Skip Downstream Classification. Useful if you only want to train the GAN and not evaluate it. Must skip either GAN or Downstream per program call.
 
 `ds_path`: Downstream Classification Checkpoint path to load. Must have been saved by a previous run of this program.
 

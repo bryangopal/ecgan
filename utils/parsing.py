@@ -2,9 +2,7 @@ from argparse import ArgumentParser
 
 _parser = ArgumentParser()
 
-_parser.add_argument("dir", type=str)
 _parser.add_argument("frac", type=float)
-
 _parser.add_argument("--gen_mode", type=str, default=None,
                      choices=["replace", "augment"])  
 _parser.add_argument("--skip_gan", action="store_true")
@@ -25,4 +23,7 @@ _parser.add_argument("--batch_size", type=int, default=2048)
 args = _parser.parse_args()
 
 if args.skip_gan and args.gen_mode == "augment":
-  args.batch_size = int(args.batch_size * args.frac) 
+  args.batch_size = int(args.batch_size * args.frac)
+
+if args.skip_gan == args.skip_ds:
+  raise ValueError("Must train either GAN or Downstream model.")
