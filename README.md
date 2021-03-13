@@ -3,9 +3,7 @@ ECG GAN Conditioned on Class and Metadata. Leverages parts of a codebase I wrote
 
 To run, type `python run.py` with the directory name of where you would like checkpoint and logging information saved. You can optionally modify program behavior with the following flags:
 
-`gen_mode`: How to use the GAN for downstream classification. Choices: `"replace"` (replace original data with GAN data) or `"augment"` (generate as many samples masked o)
-
-`skip_gan`: Skip GAN Training. Useful if you want to load state from a checkpoint.
+`gan_data_frac`: How much data the GAN is allowed to see in the training process.
 
 `skip_gan`: Skip GAN Training. Useful if you want to load state from a checkpoint. Must skip either GAN or Downstream per program call.
 
@@ -14,6 +12,10 @@ To run, type `python run.py` with the directory name of where you would like che
 `gan_lr`: Learning rate of your GAN. Default: `2e-4`
 
 `z_dim`: What the dimensionality of your noise vector should be. Default: `256`
+
+`ds_gen_frac`: If `ds_gen_mode` is set to `"augment"`, specifies what fraction of the batch should contain generated data.
+
+`ds_gen_mode`: How to use the GAN for downstream classification. Choices: `"replace"` (replace original data with GAN data) or `"augment"` (Fill out `ds_gen_frac` of each batch with generated data)
 
 `skip_ds`: Skip Downstream Classification. Useful if you only want to train the GAN and not evaluate it. Must skip either GAN or Downstream per program call.
 

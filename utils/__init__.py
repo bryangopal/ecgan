@@ -47,8 +47,8 @@ configs = AttrDict({
       "lr": args.ds_lr,
       "num_channels": num_leads,
       "num_classes": num_classes,
-      "gen_mode": args.gen_mode,
-      "gen_frac": 1 - args.frac,
+      "gen_mode": args.ds_gen_mode,
+      "gen_frac": args.ds_gen_frac,
       "batch_size": args.batch_size
     },
     "trainer": _trainer
@@ -56,7 +56,7 @@ configs = AttrDict({
 
   "pdm": {
     "path": data_path,
-    "frac": args.frac,
+    "frac": args.gan_data_frac,
     "folds": {
       "train": [0, 1, 4, 5, 6, 7, 8, 9],
       "val": [2],
