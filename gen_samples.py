@@ -17,7 +17,6 @@ classes = np.array(sorted(("270492004", "164889003", "164890007", "426627000",
 
 def main(args: Namespace):
   seed_everything(6)
-  if not args.path: raise ValueError("Sample Generation Requires a Saved GAN.")
 
   gan = ECGAN.load_from_checkpoint(args.path)
   age = torch.tensor([[0.5]])
@@ -29,5 +28,5 @@ def main(args: Namespace):
 if __name__ == "__main__":
   _parser = ArgumentParser()
 
-  _parser.add_argument("gan_path", type=os.path.expanduser)
+  _parser.add_argument("path", type=os.path.expanduser)
   main(_parser.parse_args())
