@@ -14,9 +14,9 @@ def main():
   gan = ECGAN.load_from_checkpoint(cfg.path)
   age = torch.tensor([[0.5]])
   sex = torch.tensor([[0]])
-  dx  = torch.from_numpy(classes == "164889003").float().unsqueeze_(0) #atrial fibrilation
+  dx  = torch.from_numpy(classes == "426783006").float().unsqueeze_(0) #atrial fibrilation
 
-  torch.save(gan(age, sex, dx), f"{check_dir}/58_F_AFIB.pt")
+  torch.save(gan(age, sex, dx), f"{check_dir}/58_F_SINUS.pt")
 
 if __name__ == "__main__":
   main()
