@@ -24,7 +24,7 @@ def main(args: Namespace):
   sex = torch.randint(high=2, size=(1, 1))
   dx  = torch.from_numpy(classes == "426783006").float().unsqueeze_(0)
 
-  torch.save(gan(age, sex, dx), f"{os.path.split(args.path)[0]}/58_F_SINUS.pt")
+  torch.save(gan(age, sex, dx), f"{os.path.split(args.path)[0]}/SINUS.pt")
 
 if __name__ == "__main__":
   _parser = ArgumentParser()
