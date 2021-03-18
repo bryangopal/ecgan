@@ -34,11 +34,11 @@ def main():
   pdm.setup("test")
 
   input = torch.empty(0)
-  target = torch.empty(0)
+  target = torch.empty(0, dtype=torch.long)
   for x, *_, y in pdm.test_dataloader():
     with torch.no_grad():
       input = torch.cat((input, classifier(x)), dim=0)
-      target = torch.cat((target, y))
+      target = torch.cat((target, y.long()))
   
   multiclass_auroc(input, target, True)
 
