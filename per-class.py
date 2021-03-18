@@ -15,7 +15,7 @@ from utils import configs, num_classes, class_labels, classes
 
 def multiclass_auroc(input: Tensor, target: Tensor, print_classes: bool = False) -> Tensor:
   with torch.no_grad():
-    pred = F.softmax(input, dim=1)
+    pred = F.softmax(input, dim=-1)
 
     aurocs = {}
     for c in range(num_classes):
