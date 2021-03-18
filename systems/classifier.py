@@ -29,10 +29,13 @@ class Classifier(pl.LightningModule):
       "test": AUROC(self.hparams.num_classes, compute_on_step=False, average="macro")
     }
   
+  def forward(self, x: Tensor):
+    return self.classifier(self.model(x))
+
   def _shared_step(self, batch, stage: str):
     x, y = self.batch_fn(batch) if stage == "train" else (batch[0], batch[-1])
 
-    y_hat = self.classifier(self.model(x))
+    y_hat = self(x)
     if stage == "train": 
       loss = bce(y_hat, y)
       self.log(f"{stage}_loss", loss)
